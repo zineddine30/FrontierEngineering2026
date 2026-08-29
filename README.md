@@ -31,7 +31,7 @@ Query Doctor:
 
 ## Can another person reproduce the result?
 
-See [Reproduction Guide](#reproduction-guide) below. *(TODO: complete once Phase 7 is finalized.)*
+Yes — see the full [Reproduction Guide](#reproduction-guide) below: exact commands from a clean environment, expected data volumes, expected query counts, and approximate runtime/cost for every step.
 
 ---
 
@@ -126,22 +126,34 @@ php artisan benchmark:run-all
 ```
 Then visit `http://127.0.0.1:8000/benchmark-results` — expect the **Before** column from the table in `README.md` (1,095 total queries across the 10 endpoints).
 
-### Step 2 — Run the Agent
+### Step 2 — Run the Agent (Full Closed Loop)
 
 ```bash
-php artisan agent:run-query-doctor
+php artisan agent:run-query-doctor --reset --provider=deepseek
 ```
-Expected: 3 steps, ~5,200 tokens, under $0.01 at current Gemini 3.6 Flash pricing, completing in a few seconds. Output: a 10-point audit report matching `AGENT_TRAJECTORY.md`. Full raw log saved to `storage/logs/agent-runs/run_<timestamp>.json`.
+`--reset` restores the naive baseline controller and clears logs automatically before running. `--provider` accepts `gemini` (default) or `deepseek` — use `deepseek` if Gemini's free-tier daily quota (20 requests/day) is exhausted.
 
-### Step 3 — Reproduce the Fixed Solution
+Expected: the agent reads the controller, proposes 8 fixes via a structured `propose_fix` tool (each shown as a diff), asks for `yes`/`no` confirmation on each one, applies approved fixes with automatic syntax validation, then **automatically re-runs the full 10-endpoint benchmark** and prints a Before/After table. Full raw log saved to `storage/logs/agent-runs/run_<timestamp>.json` — see `AGENT_TRAJECTORY.md` for a worked example.
 
-Copy the fixed controller back in (this is the version already in the repo by default):
+Expect the final table to show: **1,095 → 20 total queries (98.2% reduction)**.
+
+### Step 3 — Manually Reproduce Both Sides Independently (optional, for full verification)
+
+If you want to verify the before/after numbers outside the agent's own run:
+
 ```bash
-copy app\Http\Controllers\BenchmarkController.fixed.php.bak app\Http\Controllers\BenchmarkController.php
-rmdir /s /q storage\logs\benchmark & mkdir storage\logs\benchmark
+copy app\Http\Controllers\BenchmarkController.baseline.php app\Http\Controllers\BenchmarkController.php /Y
+del storage\logs\benchmark\*.json
 php artisan benchmark:run-all
 ```
-Visit `/benchmark-results` again — expect the **After** column from `README.md` (22 total queries — a 98% reduction).
+Visit `/benchmark-results` — expect **1,095** total queries (the Before column).
+
+```bash
+copy app\Http\Controllers\BenchmarkController.fixed.php.bak app\Http\Controllers\BenchmarkController.php /Y
+del storage\logs\benchmark\*.json
+php artisan benchmark:run-all
+```
+Visit `/benchmark-results` again — expect **20** total queries (the After column, 98.2% reduction).
 
 ### Cost & Runtime Summary
 
@@ -155,7 +167,11 @@ Visit `/benchmark-results` again — expect the **After** column from `README.md
 
 ## Main Failure Mode & Hot Take
 
-*(TODO — filled in during Phase 6/7, based on at least one experiment that was tried and removed. Candidate: an earlier "missing relationship" bug design was considered and dropped in favor of a data-quality bug, since it needed a different detection mechanism than query-log analysis — see NOTES.md.)*
+**Main failure mode:** During development of the closed-loop apply step, one interactive session produced a `500` error across **all** 10 endpoints simultaneously after a batch of fixes — but `php -l` reported the file as perfectly valid PHP. The actual cause: a stray manual edit had renamed the class declared *inside* `BenchmarkController.php` without renaming the file itself, silently breaking PSR-4 autoloading for every route using that controller.
+
+**Hot take:** Syntax validation (`php -l`) is necessary but not sufficient for safely letting an agent modify code — it catches malformed PHP, but it cannot catch a semantically broken file that is still syntactically valid, like a mismatched class name. The generalizable lesson: **when unrelated endpoints or tests fail uniformly and simultaneously, suspect a shared dependency (autoloading, a trait, a service provider, middleware) before re-reading the specific logic that was just changed** — a uniform failure pattern is itself diagnostic information, and it's a different debugging move than checking the diff line-by-line. If we built this again, we'd add a second, cheap runtime check after every agent-applied patch (e.g. hitting one endpoint and confirming a 200, not just `php -l`) as a belt-and-suspenders verification layer.
+
+Full technical account: see [`AGENT_TRAJECTORY.md`](./AGENT_TRAJECTORY.md), §11.
 
 ---
 
