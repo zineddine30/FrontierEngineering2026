@@ -94,7 +94,7 @@ php artisan key:generate
 
 Edit `.env`:
 ```env
-DB_CONNECTION=mysql
+DB_CONNECTION=mariadb
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=query_doctor
