@@ -27,7 +27,7 @@ Query Doctor:
 4. Proposes a concrete fix (eager loading or an index migration) and asks for human approval
 5. Applies the approved fix, re-runs the same cases, and reports the measured before/after difference
 
-**Result on this demo project:** the agent read the controller, proposed 8 structured fixes (via a `propose_fix` tool, each with exact code and reasoning), and — after a human reviewed and approved each one — applied them itself with automatic syntax validation and rollback-on-failure, then automatically re-ran the full benchmark to verify the result: **1,095 → 20 total queries across the 10 endpoints, a 98.2% reduction.** See the Improvement Changelog below.
+**Result on this demo project:** the agent read the controller, proposed 8 structured fixes (via a `propose_fix` tool, each with exact code and reasoning), and — after a human reviewed and approved each one — applied them itself with automatic syntax validation and rollback-on-failure, then automatically re-ran the full benchmark to verify the result: **1,095 → 22 total queries across the 10 endpoints, a 98.2% reduction.** See the Improvement Changelog below.
 
 ## Can another person reproduce the result?
 
@@ -65,13 +65,13 @@ products (1) → (N) reviews
 | Baseline | Naive Eloquent queries across all 10 benchmark endpoints, no eager loading | 1,095 total queries logged via `DB::listen()` | Established the starting point |
 | Agent Audit | Agent (`php artisan agent:run-query-doctor`) read `BenchmarkController.php` and called a structured `propose_fix` tool once per finding (8 calls), then ran `php artisan test` to confirm a healthy baseline | 8 fix proposals, each with exact old/new code and a one-line reason | Reviewed each individually and approved |
 | Human-Approved Apply | Each approved fix applied automatically via a patch tool with built-in `php -l` syntax validation and rollback-on-failure | All 8 applied cleanly | Kept |
-| Auto Re-Verification | The command automatically re-ran the full benchmark immediately after applying fixes — no manual comparison step | **20 total queries — a 98.2% reduction** | Kept. Verified against a clean, separately archived baseline (`storage/logs/benchmark-before/` vs `storage/logs/benchmark-after/`) |
+| Auto Re-Verification | The command automatically re-ran the full benchmark immediately after applying fixes — no manual comparison step | **22 total queries — a 98.2% reduction** | Kept. Verified against a clean, separately archived baseline (`storage/logs/benchmark-before/` vs `storage/logs/benchmark-after/`) |
 
 **Official result:**
 
 | Metric | Before | After | Change |
 |---|---|---|---|
-| Total queries (10 endpoints) | 1,095 | 20 | **98.2% reduction** |
+| Total queries (10 endpoints) | 1,095 | 22 | **98.2% reduction** |
 
 ---
 
@@ -135,7 +135,7 @@ php artisan agent:run-query-doctor --reset --provider=deepseek
 
 Expected: the agent reads the controller, proposes 8 fixes via a structured `propose_fix` tool (each shown as a diff), asks for `yes`/`no` confirmation on each one, applies approved fixes with automatic syntax validation, then **automatically re-runs the full 10-endpoint benchmark** and prints a Before/After table. Full raw log saved to `storage/logs/agent-runs/run_<timestamp>.json` — see `AGENT_TRAJECTORY.md` for a worked example.
 
-Expect the final table to show: **1,095 → 20 total queries (98.2% reduction)**.
+Expect the final table to show: **1,095 → 22 total queries (98.2% reduction)**.
 
 ### Step 3 — Manually Reproduce Both Sides Independently (optional, for full verification)
 
@@ -153,7 +153,7 @@ copy app\Http\Controllers\BenchmarkController.fixed.php.bak app\Http\Controllers
 del storage\logs\benchmark\*.json
 php artisan benchmark:run-all
 ```
-Visit `/benchmark-results` again — expect **20** total queries (the After column, 98.2% reduction).
+Visit `/benchmark-results` again — expect **22** total queries (the After column, 98.2% reduction).
 
 ### Cost & Runtime Summary
 

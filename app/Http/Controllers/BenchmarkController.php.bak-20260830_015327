@@ -81,8 +81,6 @@ class BenchmarkController  extends Controller
 
     public function userOrders(User $user)
     {
-        $user->load('orders.items');
-
         return $user->orders->map(fn ($o) => [
             'number' => $o->number,
             'items_count' => $o->items->count(),
@@ -91,7 +89,7 @@ class BenchmarkController  extends Controller
 
     public function recentReviews()
     {
-        return Review::with(['product', 'user'])->latest()->take(20)->get()->map(fn ($r) => [
+        return Review::latest()->take(20)->get()->map(fn ($r) => [
             'product' => $r->product->label,
             'user' => $r->user->name,
         ]);

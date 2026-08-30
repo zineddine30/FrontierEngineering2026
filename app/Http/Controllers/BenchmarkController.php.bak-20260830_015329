@@ -91,7 +91,7 @@ class BenchmarkController  extends Controller
 
     public function recentReviews()
     {
-        return Review::with(['product', 'user'])->latest()->take(20)->get()->map(fn ($r) => [
+        return Review::latest()->take(20)->get()->map(fn ($r) => [
             'product' => $r->product->label,
             'user' => $r->user->name,
         ]);
