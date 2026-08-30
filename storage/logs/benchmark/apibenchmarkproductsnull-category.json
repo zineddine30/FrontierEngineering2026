@@ -1,0 +1,9 @@
+[
+    {
+        "query_count": 1,
+        "total_time_ms": 1.99,
+        "duration_ms": 24.71,
+        "endpoint": "api\/benchmark\/products\/null-category",
+        "timestamp": "2026-08-30T02:44:28+00:00"
+    }
+]

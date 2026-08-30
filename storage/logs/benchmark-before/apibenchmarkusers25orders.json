@@ -1,0 +1,9 @@
+[
+    {
+        "query_count": 7,
+        "total_time_ms": 1.81,
+        "duration_ms": 12.5,
+        "endpoint": "api\/benchmark\/users\/25\/orders",
+        "timestamp": "2026-08-29T16:08:32+00:00"
+    }
+]

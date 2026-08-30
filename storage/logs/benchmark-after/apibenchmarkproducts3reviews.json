@@ -1,0 +1,9 @@
+[
+    {
+        "query_count": 2,
+        "total_time_ms": 0.94,
+        "duration_ms": 10.76,
+        "endpoint": "api\/benchmark\/products\/3\/reviews",
+        "timestamp": "2026-08-29T16:10:06+00:00"
+    }
+]
