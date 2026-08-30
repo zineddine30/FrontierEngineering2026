@@ -10,7 +10,7 @@ class BenchmarkController  extends Controller
 
     public function orders()
     {
-        return Order::with(['user', 'items'])->get()->map(fn ($o) => [
+        return Order::all()->map(fn ($o) => [
             'id' => $o->id,
             'user' => $o->user->name,
             'items_count' => $o->items->count(),
@@ -19,8 +19,6 @@ class BenchmarkController  extends Controller
 
     public function orderShow(Order $order)
     {
-        $order->load(['user', 'items.product']);
-
         return [
             'id' => $order->id,
             'user' => $order->user->name,
@@ -32,7 +30,7 @@ class BenchmarkController  extends Controller
 
     public function enterpriseOrder()
     {
-        $order = Order::where('number', 'ENT-00001')->with('items.product')->firstOrFail();
+        $order = Order::where('number', 'ENT-00001')->firstOrFail();
         return [
             'id' => $order->id,
             'items' => $order->items->map(fn ($item) => [
@@ -43,7 +41,7 @@ class BenchmarkController  extends Controller
 
     public function products()
     {
-        return Product::with('category')->get()->map(fn ($p) => [
+        return Product::all()->map(fn ($p) => [
             'label' => $p->label,
             'category' => optional($p->category)->label,
         ]);
@@ -56,8 +54,6 @@ class BenchmarkController  extends Controller
 
     public function productReviews(Product $product)
     {
-        $product->load('reviews.user');
-
         return $product->reviews->map(fn ($r) => [
             'rating' => $r->rating,
             'user' => $r->user->name,
@@ -71,27 +67,23 @@ class BenchmarkController  extends Controller
 
     public function categoryProducts(Category $category)
     {
-        $category->load(['products' => fn ($q) => $q->withCount('reviews')]);
-
         return $category->products->map(fn ($p) => [
             'label' => $p->label,
-            'reviews_count' => $p->reviews_count,
+            'reviews_count' => $p->reviews->count(),
         ]);
     }
 
     public function userOrders(User $user)
     {
-        $user->load(['orders' => fn ($q) => $q->withCount('items')]);
-
         return $user->orders->map(fn ($o) => [
             'number' => $o->number,
-            'items_count' => $o->items_count,
+            'items_count' => $o->items->count(),
         ]);
     }
 
     public function recentReviews()
     {
-        return Review::latest()->take(20)->with(['product', 'user'])->get()->map(fn ($r) => [
+        return Review::latest()->take(20)->get()->map(fn ($r) => [
             'product' => $r->product->label,
             'user' => $r->user->name,
         ]);
