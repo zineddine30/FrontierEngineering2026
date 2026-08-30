@@ -1,0 +1,104 @@
+{
+    "steps": [
+        {
+            "type": "model_turn",
+            "step": 1,
+            "raw": {
+                "candidates": [
+                    {
+                        "content": {
+                            "parts": [
+                                {
+                                    "functionCall": {
+                                        "name": "read_file",
+                                        "args": {
+                                            "path": "app\/Http\/Controllers\/BenchmarkController.php"
+                                        },
+                                        "id": "call_509750"
+                                    },
+                                    "thoughtSignature": "Eq4CCqsCARFNMg\/7TO3SCNSfhLLvo1KfTVGfWaCbXaWKmEHNcsdpn2\/U60GfWpHDhpYi0T+IN5BQPy1wmY4QskgNsax0EnGnjB8ip7Gph6EHGpu+pe8Pl7UuMRCxi1hRBaht+t3Alb8GaAPN190Xd3jAMoTBeSFDJTr4Np6jw8oH4cw6V4jIfquJ7a8p1EsRcluiVjA04fk5RjVPYuvQDm5aewf6jphkmP2Ow1cOQjNLm\/n4E2Kkn\/fcsrm+DGvXRDiyxCxARGOr6iyN3kAHWbp\/PwLIBb5YWKiYKZrsFPxpe0jzlaTXM2d2KWpe1BNdXnXrzUZ8YRs+VgUVC6ipK6z3Q6bsDpOry1LLhpuhS6eL9NAkRQC6YUMJ5QYUn4zALKWxLt6d0Y97iPb0jfNNk\/s="
+                                }
+                            ],
+                            "role": "model"
+                        },
+                        "finishReason": "STOP",
+                        "index": 0,
+                        "finishMessage": "Model generated function call(s)."
+                    }
+                ],
+                "usageMetadata": {
+                    "promptTokenCount": 498,
+                    "candidatesTokenCount": 25,
+                    "totalTokenCount": 573,
+                    "promptTokensDetails": [
+                        {
+                            "modality": "TEXT",
+                            "tokenCount": 498
+                        }
+                    ],
+                    "thoughtsTokenCount": 50,
+                    "serviceTier": "standard"
+                },
+                "modelVersion": "gemini-3.6-flash",
+                "responseId": "PcOSavTnLu_pnsEPwJiC8QU"
+            }
+        },
+        {
+            "type": "tool_call",
+            "step": 1,
+            "tool": "read_file",
+            "input": {
+                "path": "app\/Http\/Controllers\/BenchmarkController.php"
+            },
+            "output": {
+                "path": "app\/Http\/Controllers\/BenchmarkController.php",
+                "content": "<?php\n\nnamespace App\\Http\\Controllers;\n\nuse Illuminate\\Http\\Request;\nuse App\\Models\\{Order, Product, Category, User, Review};\n\nclass BenchmarkBeforeAIController extends Controller\n{\n    # Before \n        public function orders()\n    {\n        return Order::all()->map(fn ($o) => [\n            'id' => $o->id,\n            'user' => $o->user->name,\n            'items_count' => $o->items->count(),\n        ]);\n    }\n\n    public function orderShow(Order $order)\n    {\n        return [\n            'id' => $order->id,\n            'user' => $order->user->name,\n            'items' => $order->items->map(fn ($item) => [\n                'product' => $item->product->label,\n            ]),\n        ];\n    }\n\n    public function enterpriseOrder()\n    {\n        $order = Order::where('number', 'ENT-00001')->firstOrFail();\n        return [\n            'id' => $order->id,\n            'items' => $order->items->map(fn ($item) => [\n                'product' => $item->product->label,\n            ]),\n        ];\n    }\n\n    public function products()\n    {\n        return Product::all()->map(fn ($p) => [\n            'label' => $p->label,\n            'category' => optional($p->category)->label,\n        ]);\n    }\n\n    public function productsByCategory(Category $category)\n    {\n        return Product::where('category_id', $category->id)->get();\n    }\n\n    public function productReviews(Product $product)\n    {\n        return $product->reviews->map(fn ($r) => [\n            'rating' => $r->rating,\n            'user' => $r->user->name,\n        ]);\n    }\n\n    public function productsWithoutCategory()\n    {\n        return Product::whereNull('category_id')->get();\n    }\n\n    public function categoryProducts(Category $category)\n    {\n        return $category->products->map(fn ($p) => [\n            'label' => $p->label,\n            'reviews_count' => $p->reviews->count(),\n        ]);\n    }\n\n    public function userOrders(User $user)\n    {\n        return $user->orders->map(fn ($o) => [\n            'number' => $o->number,\n            'items_count' => $o->items->count(),\n        ]);\n    }\n\n    public function recentReviews()\n    {\n        return Review::latest()->take(20)->get()->map(fn ($r) => [\n            'product' => $r->product->label,\n            'user' => $r->user->name,\n        ]);\n    }\n}\n"
+            },
+            "timestamp": "2026-08-29T11:32:19+00:00"
+        },
+        {
+            "type": "model_turn",
+            "step": 2,
+            "raw": {
+                "error": {
+                    "code": 429,
+                    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash\nPlease retry in 40.702405424s.",
+                    "status": "RESOURCE_EXHAUSTED",
+                    "details": [
+                        {
+                            "@type": "type.googleapis.com\/google.rpc.Help",
+                            "links": [
+                                {
+                                    "description": "Learn more about Gemini API quotas",
+                                    "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                                }
+                            ]
+                        },
+                        {
+                            "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                            "violations": [
+                                {
+                                    "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                                    "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                                    "quotaDimensions": {
+                                        "location": "global",
+                                        "model": "gemini-3.6-flash"
+                                    },
+                                    "quotaValue": "20"
+                                }
+                            ]
+                        },
+                        {
+                            "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                            "retryDelay": "40s"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "final_answer",
+            "text": ""
+        }
+    ]
+}
