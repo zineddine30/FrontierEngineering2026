@@ -19,7 +19,6 @@ class BenchmarkController  extends Controller
 
     public function orderShow(Order $order)
     {
-        $order->load(['user', 'items.product']);
         return [
             'id' => $order->id,
             'user' => $order->user->name,
@@ -31,7 +30,7 @@ class BenchmarkController  extends Controller
 
     public function enterpriseOrder()
     {
-        $order = Order::with('items.product')->where('number', 'ENT-00001')->firstOrFail();
+        $order = Order::where('number', 'ENT-00001')->firstOrFail();
         return [
             'id' => $order->id,
             'items' => $order->items->map(fn ($item) => [
@@ -42,7 +41,7 @@ class BenchmarkController  extends Controller
 
     public function products()
     {
-        return Product::with('category')->get()->map(fn ($p) => [
+        return Product::all()->map(fn ($p) => [
             'label' => $p->label,
             'category' => optional($p->category)->label,
         ]);
@@ -55,7 +54,7 @@ class BenchmarkController  extends Controller
 
     public function productReviews(Product $product)
     {
-        return $product->reviews()->with('user')->get()->map(fn ($r) => [
+        return $product->reviews->map(fn ($r) => [
             'rating' => $r->rating,
             'user' => $r->user->name,
         ]);
@@ -68,7 +67,7 @@ class BenchmarkController  extends Controller
 
     public function categoryProducts(Category $category)
     {
-        return $category->products()->with('reviews')->get()->map(fn ($p) => [
+        return $category->products->map(fn ($p) => [
             'label' => $p->label,
             'reviews_count' => $p->reviews->count(),
         ]);
@@ -76,7 +75,7 @@ class BenchmarkController  extends Controller
 
     public function userOrders(User $user)
     {
-        return $user->orders()->with('items')->get()->map(fn ($o) => [
+        return $user->orders->map(fn ($o) => [
             'number' => $o->number,
             'items_count' => $o->items->count(),
         ]);
@@ -84,7 +83,7 @@ class BenchmarkController  extends Controller
 
     public function recentReviews()
     {
-        return Review::with(['product', 'user'])->latest()->take(20)->get()->map(fn ($r) => [
+        return Review::latest()->take(20)->get()->map(fn ($r) => [
             'product' => $r->product->label,
             'user' => $r->user->name,
         ]);

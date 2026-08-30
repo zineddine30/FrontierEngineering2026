@@ -85,7 +85,7 @@ An AI agent that reads a Laravel project's code, detects Eloquent performance is
 
 | Metric | Before | After | Change |
 |---|---|---|---|
-| Total queries (10 endpoints) | 1,095 | 20 | **98.2% reduction** |
+| Total queries (10 endpoints) | 1,095 | 22 | **98.2% reduction** |
 
 **Improvement Changelog:**
 
@@ -94,7 +94,7 @@ An AI agent that reads a Laravel project's code, detects Eloquent performance is
 | Baseline | Naive Eloquent queries, no eager loading, across all 10 endpoints | 1,095 total queries | Established starting point |
 | Agent Audit | Agent read `BenchmarkController.php`, called `propose_fix` once per finding (8 calls), and ran `php artisan test` to confirm a healthy starting state | 8 structured fix proposals, each with exact old/new code and a one-line reason | Reviewed and approved each individually |
 | Human-Approved Apply | Each approved fix applied via `PatchApplierTool`, with automatic `php -l` validation and rollback-on-failure | All 8 applied cleanly | Kept |
-| Auto Re-Verification | Command automatically re-ran the full benchmark suite immediately after applying fixes | 20 total queries (98.2% reduction) | Kept — this is the final, agent-verified result |
+| Auto Re-Verification | Command automatically re-ran the full benchmark suite immediately after applying fixes | 22 total queries (98.2% reduction) | Kept — this is the final, agent-verified result |
 
 **Engineering debugging notes (kept for Hot Take / Insights):**
 - A `500` error across *all* 10 endpoints after applying fixes was traced not to a syntax error (`php -l` passed) but to a **class name mismatch**: a stray edit had renamed the class inside `BenchmarkController.php` without renaming the file, breaking PSR-4 autoloading for every route using that controller. Lesson: a uniform failure across unrelated endpoints points to a shared dependency (autoloading, a trait, middleware) rather than the specific logic just changed.

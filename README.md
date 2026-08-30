@@ -54,7 +54,7 @@ products (1) → (N) reviews
 
 - Seeded with a **fixed random seed** (`mt_srand(1234)`) for full reproducibility
 - **Deliberate data-quality bug:** ~20% of products have a `null` `category_id`, simulating a developer forgetting to populate the field during a bulk import — a realistic, partial (not total) mistake for the agent to catch
-- **Deliberate stress-test case:** one dedicated "enterprise" order (`ENT-00001`) with 120 line items spanning many different products, to make the cost of N+1 dramatically visible
+- **Deliberate stress-test case:** one dedicated "enterprise" order (`ENT-00001`) with more than 300 line items spanning many different products, to make the cost of N+1 dramatically visible
 
 ---
 
